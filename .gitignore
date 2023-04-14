@@ -1,0 +1,11 @@
+.bsp
+.metals
+.ammonite
+.npmrc
+.scala
+*.js
+*.js.map
+.scala-build
+*.build_artifacts.txt
+bin
+.ammonite
