@@ -16,19 +16,36 @@ object HasId:
   given [A]: HasId[A, A] with
     def getId(a: A): A = a
 
-sealed trait Tree[A]:
+sealed trait Tree[A](value: A, child: Option[Node[A]]):
 
-// sealed abstract class Tree[A](value: A, child: Option[Node[A]]) derives Functor, Traverse:
-//   def mainline: List[Tree[A]]                     = this :: child.fold(List.empty[Tree[A]])(_.mainline)
-//   def hasId[Id](id: Id)(using h: HasId[A, Id]): Boolean = h.getId(value) == id
+  def withValue(value: A): IsTree[A, this.type] = this match
+    case n: Node[A]      => n.copy(value = value)
+    case v: Variation[A] => v.copy(value = value)
+
+  def mainline: List[Tree[A]]                           = this :: child.fold(List.empty[Tree[A]])(_.mainline)
+  def hasId[Id](id: Id)(using h: HasId[A, Id]): Boolean = h.getId(value) == id
   def modifyAt[Id](path: List[Id], f: TreeModifier[A])(using h: HasId[A, Id]): Option[IsTree[A, this.type]]
 
+  // find node in the mainline
+  def findInMainline(predicate: A => Boolean): Option[Tree[A]] =
+    if predicate(value) then this.some
+    else
+      child.fold(none[Node[A]]): c =>
+        if predicate(c.value) then c.some
+        else c.findInMainline(predicate)
+
 object Tree:
-  // def f(node: Tree[A]) =
   def f[A]: TreeModifier[A] = node =>
     node match
       case n: Node[A]      => n
       case v: Variation[A] => v
+
+  def lift[A](f: A => A): TreeModifier[A] = tree => tree.withValue(f(tree.value))
+
+  // def lift[A, B](f: A => B): (tree: Tree[A]) => IsTree[B, Tree[B]] = tree =>
+  //   tree match
+  //     case n: Node[A]      => n.map(f)
+  //     case v: Variation[A] => v.map(f)
 
   val node = Node(1, Some(Node(2)))
   def modifyAt[A, Id](tree: Tree[A], path: List[Id], f: TreeModifier[A])(using
@@ -51,11 +68,10 @@ final case class Node[A](
     value: A,
     child: Option[Node[A]] = None,
     variations: List[Variation[A]] = Nil
-) extends Tree[A] derives Functor,
+) extends Tree[A](value, child)
+    derives Functor,
       Traverse:
-  def mainline: List[Tree[A]]                           = this :: child.fold(List.empty[Tree[A]])(_.mainline)
-  def hasId[Id](id: Id)(using h: HasId[A, Id]): Boolean = h.getId(value) == id
-  def toVariation: Variation[A]                         = Variation(value, child)
+  def toVariation: Variation[A] = Variation(value, child)
 
   override def modifyAt[Id](path: List[Id], f: TreeModifier[A])(using h: HasId[A, Id]): Option[Node[A]] =
     path match
@@ -76,10 +92,17 @@ final case class Node[A](
           case (true, ns) => copy(variations = ns).some
           case (false, _) => none
 
-final case class Variation[A](value: A, child: Option[Node[A]] = None) extends Tree[A] derives Functor, Traverse:
-  def toNode: Node[A]                                   = Node(value, child)
-  def mainline: List[Tree[A]]                           = this :: child.fold(List.empty[Tree[A]])(_.mainline)
-  def hasId[Id](id: Id)(using h: HasId[A, Id]): Boolean = h.getId(value) == id
+  def modifyInMainline(predicate: A => Boolean, f: Node[A] => Node[A]): Option[Node[A]] =
+    if predicate(value) then f(this).some
+    else
+      child.fold(none[Node[A]]): c =>
+        if predicate(c.value) then c.modifyInMainline(predicate, f)
+        else c.modifyInMainline(predicate, f)
+
+final case class Variation[A](value: A, child: Option[Node[A]] = None) extends Tree[A](value, child)
+    derives Functor,
+      Traverse:
+  def toNode: Node[A] = Node(value, child)
   override def modifyAt[Id](path: List[Id], f: TreeModifier[A])(using h: HasId[A, Id]): Option[Variation[A]] = ???
 
 type IntTree = Node[Int]

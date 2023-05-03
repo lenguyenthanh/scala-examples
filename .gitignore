@@ -9,3 +9,4 @@
 *.build_artifacts.txt
 bin
 .ammonite
+*.zst
