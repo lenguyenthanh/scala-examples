@@ -2,8 +2,6 @@
 //> using dep "org.typelevel::toolkit:latest.release"
 //> using repository "https://raw.githubusercontent.com/lichess-org/lila-maven/master"
 //> using dep "org.lichess::scalachess:15.2.0"
-//> using dep "dev.optics::monocle-core:3.2.0"
-//> using dep "dev.optics::monocle-macro:3.2.0"
 //> using dep "de.lhns::fs2-compress-zstd::0.4.1"
 
 import cats.syntax.all.*
