@@ -1,10 +1,9 @@
 //> using scala 3.3.0-RC6
 //> using toolkit typelevel::latest
+//> using dep de.lhns::fs2-compress-zstd::0.5.0
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
 //> using dep org.lichess::scalachess:15.2.6
-//> using dep de.lhns::fs2-compress-zstd::0.5.0
 
-import scala.util.control.NoStackTrace
 import cats.syntax.all.*
 import cats.effect.*
 import fs2.*
@@ -53,28 +52,23 @@ case class Puzzle(
 ):
   def toPgn =
     for
-      sit   <- Fen.readWithMoveNumber(fen).toRight(Puzzle.Error.InvalidFen(s"Invalid fen: $fen with id: $id"))
-      moves <- Puzzle.validateMoves(sit.situation)(moves)
+      sit   <- Fen.readWithMoveNumber(fen).toRight(RuntimeException(s"Invalid fen: $fen with id: $id"))
+      moves <- Puzzle.validateMoves(sit.situation, moves)
       tree = Node.buildWithIndex(moves, (m, i) => PgnMove(sit.ply + i, m.toSanStr))
       tags = Tags(List(Tag("Fen", fen.value), Tag("Site", gameUrl)))
       pgn  = Pgn(tags, Initial.empty, tree)
     yield pgn
 
 object Puzzle:
-  given CellDecoder[EpdFen]       = CellDecoder[String].map(EpdFen(_))
-  given CellDecoder[List[String]] = CellDecoder[String].map(_.split(" ").toList)
-  given ucis: CellDecoder[List[Uci]] =
-    CellDecoder[String].emap(Uci.readList(_).liftTo[DecoderResult](DecoderError("Invalid uci")))
-  given RowDecoder[Puzzle] = deriveRowDecoder
+  given CellDecoder[EpdFen]          = CellDecoder[String].map(EpdFen(_))
+  given CellDecoder[List[String]]    = CellDecoder[String].map(_.split(' ').toList)
+  given ucis: CellDecoder[List[Uci]] = CellDecoder[String].emap(Uci.readList(_).liftTo(DecoderError("Invalid ucis")))
+  given RowDecoder[Puzzle]           = deriveRowDecoder
 
-  def validateMoves(sit: Situation)(ucis: List[Uci]) = ucis
+  def validateMoves(sit: Situation, ucis: List[Uci]) = ucis
     .foldM((List.empty[MoveOrDrop], sit))(validateMove)
     .map(_._1.reverse)
 
   def validateMove(p: (List[MoveOrDrop], Situation), uci: Uci) =
     uci(p._2).toEither
-      .bimap(e => Error.InvalidUci(s"Invalid move $uci"), move => (move :: p._1) -> move.situationAfter)
-
-  enum Error(message: String) extends NoStackTrace:
-    case InvalidFen(message: String) extends Error(message)
-    case InvalidUci(message: String) extends Error(message)
+      .bimap(e => RuntimeException(s"Invalid move $uci"), move => (move :: p._1) -> move.situationAfter)
