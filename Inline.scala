@@ -4,13 +4,13 @@ import scala.compiletime.error
 
 inline def half(inline x: Any): Any =
   inline x match
-    case x: Int => x / 2
+    case x: Int    => x / 2
     case x: String => x.substring(0, x.length / 2)
-    case _ => error("Unknown type :p")
+    case _         => error("Unknown type :p")
 
 def half2(x: Any): Any =
   x match
-    case x: Int => x / 2
+    case x: Int    => x / 2
     case x: String => x.substring(0, x.length / 2)
 
 inline def doSomething(inline mode: Boolean): Unit =
@@ -44,5 +44,5 @@ transparent inline def getChef(isFrench: Boolean): Chef =
   // doSomething(bool) // compile error
 
   val frenchChef = getChef(true)
-  frenchChef.speakFrench // Bienvenue dans mon restaurant !
+  frenchChef.speakFrench      // Bienvenue dans mon restaurant !
   getChef(false).speakEnglish // "Welcome to my restaurant!"

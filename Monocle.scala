@@ -21,12 +21,12 @@ final case class Node[A](
     derives Functor,
       Traverse
 
-final case class Variation[A](val value: A, val child: Option[Node[A]] = None)
-    extends Tree[A](value, child) derives Functor, Traverse
+final case class Variation[A](val value: A, val child: Option[Node[A]] = None) extends Tree[A](value, child)
+    derives Functor,
+      Traverse
 
 object Tree:
   def value[A] = GenLens[Tree[A]](_.value)
-
 
 object Hello extends IOApp.Simple:
   def run =

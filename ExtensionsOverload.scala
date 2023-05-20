@@ -3,11 +3,9 @@
 import scala.language.experimental.relaxedExtensionImports
 
 object A:
-  extension (s: String)
-    def wow: Unit = println(s)
+  extension (s: String) def wow: Unit = println(s)
 object B:
-  extension (i: Int)
-    def wow: Unit = println(i)
+  extension (i: Int) def wow: Unit = println(i)
 
 import A.*
 import B.*

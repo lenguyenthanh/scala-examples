@@ -15,5 +15,4 @@ inline def inspect(inline x: Any): Any = ${ inspectCode('x) }
   // if all values in the list are Right, return a list of the values
   // otherwise return the first Left
 
-
   inspect(println("Hello"))

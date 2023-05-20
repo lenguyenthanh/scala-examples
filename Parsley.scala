@@ -13,12 +13,11 @@ val number = digit.foldLeft1[Int](0)((n, d) => n * 10 + d.asDigit)
 
 lazy val expr: Parsley[Int] =
   attempt((expr <* '+', term).zipped(_ + _)) <|>
-  (expr <* '-', term).zipped(_ - _) <|>
-  term
+    (expr <* '-', term).zipped(_ - _) <|>
+    term
 lazy val term: Parsley[Int] =
   (term <* '*', atom).zipped(_ * _) <|> atom
 lazy val atom = '(' *> expr <* ')' <|> number
 
 @main def main =
   println("hello")
-
