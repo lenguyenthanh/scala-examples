@@ -26,7 +26,7 @@ import chess.variant.Standard
 object Main
     extends CommandIOApp(
       name = "lichess-puzzles-cli",
-      header = "Convert lichess puzzles to pgn",
+      header = "Convert lichess puzzles to pgn and much more",
       version = "0.0.1"
     ):
 
@@ -42,9 +42,9 @@ object Main
       .readAll(Path("lichess_db_puzzle.csv.zst"))
       .through(ZstdDecompressor[IO](defaultChunkSize).decompress)
       .through(text.utf8.decode)
-      .through(decodeWithoutHeaders[Puzzle]())
+      .through(decodeSkippingHeaders[Puzzle]())
       .filter(_.filter(config))
-      .evalTap(x => IO.println(s"${x.id} ${x.rating} ${x.popularity}"))
+      // .evalTap(x => IO.println(s"${x.id} ${x.rating} ${x.popularity}"))
       .map(_.toPgn)
       .rethrow
       .map(_.render.value)
@@ -129,6 +129,14 @@ object CLI:
   private val maxPopularityOpt = Opts
     .option[Int]("maxPopularity", "Max popularity")
     .orNone
+
+  private val ouput = Opts
+    .option[String]("output", "pgn file ouput", "o")
+    .orNone
+
+  private val dryRun = Opts
+    .flag("dry", "dry run", "d")
+    .orFalse
 
   val parse: Opts[Config] =
     (minRatingOpt, maxRatingOpt, minPlayOpt, maxPlayOpt, minPopularityOpt, maxPopularityOpt).mapN(Config.apply)

@@ -24,15 +24,15 @@ object Hello extends IOApp.Simple:
       .through(ZstdDecompressor[IO](defaultChunkSize).decompress)
       .through(fs2.text.utf8.decode)
       .through(fs2.text.lines)
-      .take(36)
       .through(pgnPipe)
+      .take(10)
       .map(_.parse)
       .rethrow
-      .evalTap(IO.println)
+      .evalTap(IO.println(_))
 
   def pgnPipe: Pipe[IO, String, String] =
-    def go(s: Stream[IO, String], p: Option[PartialPgnState]): Pull[IO, String, Unit] = {
-      s.pull.uncons1.flatMap {
+    def go(s: Stream[IO, String], p: Option[PartialPgnState]): Pull[IO, String, Unit] =
+      s.pull.uncons1.flatMap:
         case Some((line, tl)) =>
           p match
             case None =>
@@ -41,13 +41,12 @@ object Hello extends IOApp.Simple:
               else Pull.raiseError[IO](RuntimeException(s"Pgn has to start with tag $line"))
             case Some(partial) =>
               partial.take(line) match
-                case Left(err) => Pull.raiseError(new Exception(err))
+                case Left(err) => Pull.raiseError(RuntimeException(err))
                 case Right(next) =>
                   if next.isInstanceOf[Done] then Pull.output1(next.value) >> go(tl, None)
                   else go(tl, Some(next))
         case None => Pull.done
-      }
-    }
+
     in => go(in, None).stream
 
 sealed trait PartialPgnState:
