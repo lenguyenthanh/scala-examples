@@ -20,7 +20,12 @@ object Downloader extends IOApp.Simple:
     s.through(Files[IO].writeAll(Path("lichess_db_puzzle.csv.zst")))
 
   def download(client: Client[IO]) =
-    client.stream(request).switchMap(_.body).through(Files[IO].writeAll(Path("lichess_db_puzzle.csv.zst"))).compile.drain
+    client
+      .stream(request)
+      .switchMap(_.body)
+      .through(Files[IO].writeAll(Path("lichess_db_puzzle.csv.zst")))
+      .compile
+      .drain
 
   val run: IO[Unit] = EmberClientBuilder
     .default[IO]

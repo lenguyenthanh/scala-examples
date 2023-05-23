@@ -1,6 +1,6 @@
 //> using scala 3.2.2
 //> using toolkit typelevel:latest
-//> using dep "org.tpolecat::skunk-core:0.6.0-RC2"
+//> using dep "org.tpolecat::skunk-refined:0.6.0-RC2"
 //> using dep "org.typelevel::otel4s-java:0.2.1"
 
 import cats.effect._
@@ -8,9 +8,10 @@ import skunk._
 import skunk.implicits._
 import skunk.codec.all._
 import org.typelevel.otel4s.trace.Tracer
-import natchez.Trace.Implicits.noop
 
 object Hello extends IOApp {
+
+  implicit val tracer: Tracer[IO] = Tracer.noop              // (1)
 
   val session: Resource[IO, Session[IO]] =
     Session.single(                                          // (2)
