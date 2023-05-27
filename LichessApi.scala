@@ -1,9 +1,9 @@
-//> using scala 3.3.0-RC6
+//> using scala 3.3.0
 //> using toolkit typelevel:latest
-//> using dep io.circe::circe-fs2:0.14.1
 //> using dep io.circe::circe-generic:0.14.5
+//> using dep org.gnieh::fs2-data-json:1.7.1
+//> using dep org.gnieh::fs2-data-json-circe:1.7.1
 
-import io.circe.fs2.*
 import io.circe.generic.auto.*
 import fs2.*
 import cats.effect.{ IO, IOApp }
@@ -12,6 +12,8 @@ import org.http4s.client.Client
 import org.http4s.*
 import org.http4s.headers.*
 import org.http4s.implicits.*
+import fs2.data.json.*
+import fs2.data.json.circe.*
 
 // Stream the response body as a string, then parse it as ndjson
 // This is the same as:
@@ -29,16 +31,14 @@ object LichessApi extends IOApp.Simple:
     .build
     .use(printResponse)
 
-  def parse(s: fs2.Stream[IO, String]) =
-    s.through(stringStreamParser)
-      .through(decoder[IO, Game])
+  def parse(s: Stream[IO, String]) =
+    s.through(tokens[IO, String])
+     .through(codec.deserialize[IO, Game])
 
   lazy val postRequest = Request[IO](
     method = Method.POST,
     uri = uri"https://lichess.org/api/games/export/_ids",
-    headers = Headers(
-      Accept(ndJson)
-    )
+    headers = Headers(Accept(ndJson))
   ).withEntity(
     "TJxUmbWK,4OtIh2oh,ILwozzRZ"
   )
