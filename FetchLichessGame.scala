@@ -2,12 +2,9 @@
 //> using toolkit typelevel:latest
 //> using dep "org.http4s::http4s-dsl:0.23.19"
 //> using dep io.circe::circe-generic:0.14.5
-//> using dep com.outr::scribe-cats:3.11.5
-//> using dep com.outr::scribe-slf4j:3.11.5
 //> using dep org.gnieh::fs2-data-json:1.7.1
 //> using dep org.gnieh::fs2-data-json-circe:1.7.1
 
-import cats.syntax.all.*
 import cats.MonadThrow
 import io.circe.generic.auto.*
 import fs2.{Pipe, Stream}
@@ -20,12 +17,9 @@ import org.http4s.headers.*
 import org.http4s.implicits.*
 import scala.util.control.NoStackTrace
 import scala.concurrent.duration.*
-import fs2.data.json._
 
 import fs2.data.json.*
 import fs2.data.json.circe.*
-import scribe.cats.*
-import scribe.Scribe
 
 // Stream the response body as a string, then parse it as ndjson
 // This is the same as:
@@ -46,11 +40,12 @@ object Games:
 
   case class GameError(message: String) extends NoStackTrace
 
-  def make[F[_]: Temporal, MonadThrow](client: Client[F]): Games[F] = new:
+  def make[F[_]: Temporal](client: Client[F]): Games[F] = new:
 
     override def fetch(ids: List[GameId]): Stream[F, Game] = client
       .stream(createRequest(ids))
       .through(handle429)
+      .through(untilSome)
       .flatMap(_.bodyText)
       .through(tokens[F, String])
       .through(codec.deserialize[F, Game])
@@ -61,13 +56,15 @@ object Games:
       headers = Headers(Accept(ndJson)),
     ).withEntity(ids.mkString(","))
 
-    def handle429(x: Stream[F, Response[F]]) = ((x.map: response =>
-      if response.status == Status.TooManyRequests then
-        none
-      else if response.status.isSuccess then
-        response.some
-      else throw GameError(s"Unexpected status code: ${response.status}")
-        ) ++ Stream.sleep(1.minute).as(none[Response[F]])).repeat.collectFirst{ case (Some(response)) => response }
+    def untilSome[A]: Pipe[F, Option[A], A] = xs =>
+      (xs ++ Stream.sleep(1.minute).as(none))
+        .repeat
+        .collectFirst { case (Some(x)) => x }
+
+    def handle429: Pipe[F, Response[F], Option[Response[F]]] = _.evalMap: response =>
+      if response.status == Status.TooManyRequests then none.pure[F]
+      else if response.status.isSuccess then response.some.pure[F]
+      else MonadThrow[F].raiseError(GameError(s"Unexpected status code: ${response.status}"))
 
   private val ndJson = MediaType("application", "x-ndjson", true, false, List("ndjson"))
 
