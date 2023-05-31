@@ -9,7 +9,7 @@ import org.http4s.client.Client
 import org.http4s.*
 import org.http4s.implicits.*
 
-object Downloader extends IOApp.Simple:
+object Http4sDownloader extends IOApp.Simple:
 
   lazy val request = Request[IO](
     method = Method.GET,

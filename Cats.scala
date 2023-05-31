@@ -14,7 +14,7 @@ import cats.data.Validated
 
   il.map(f)   // List[Either[String, Int]]
     .sequence // Either[String, List[Int]]
-    === il.traverse(f)
+    // il.traverse(f)
 
   val x = l.sequence
   println(x)

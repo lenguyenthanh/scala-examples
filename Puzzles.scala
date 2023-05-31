@@ -1,8 +1,8 @@
-//> using scala 3.3.0-RC6
+//> using scala 3.3.0
 //> using toolkit typelevel:latest
 //> using dep de.lhns::fs2-compress-zstd:0.5.0
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
-//> using dep org.lichess::scalachess:15.2.6
+//> using dep org.lichess::scalachess:15.2.8
 
 import cats.syntax.all.*
 import cats.effect.*

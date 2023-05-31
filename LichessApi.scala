@@ -37,7 +37,7 @@ object LichessApi extends IOApp.Simple:
 
   lazy val postRequest = Request[IO](
     method = Method.POST,
-    uri = uri"https://lichess.org/api/games/export/_ids",
+    uri = uri"https://lichess.org/api/games/export/_ids&opening=true",
     headers = Headers(Accept(ndJson))
   ).withEntity(
     "TJxUmbWK,4OtIh2oh,ILwozzRZ"
