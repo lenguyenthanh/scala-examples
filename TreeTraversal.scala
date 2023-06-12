@@ -26,4 +26,3 @@ object Main extends IOApp.Simple:
   def run =
     val rose: Rose[Int] = Rose(1, Forest(List(Rose(2, Forest(List(Rose(3, Forest(Nil))))))))
     IO.println("Hello World!")
-

@@ -12,10 +12,6 @@ import cats.syntax.all.*
 trait HasId[A, Id]:
   def getId(a: A): Id
 
-object HasId:
-  given [A]: HasId[A, A] with
-    def getId(a: A): A = a
-
 sealed trait Tree[A](value: A, child: Option[Node[A]]):
 
   def withValue(value: A): IsTree[A, this.type] = this match
