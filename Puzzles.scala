@@ -43,9 +43,10 @@ object Main
       .through(ZstdDecompressor[IO](defaultChunkSize).decompress)
       .through(text.utf8.decode)
       .through(decodeSkippingHeaders[Puzzle]())
-      .filter(_.filter(config))
+      // .filter(_.filter(config))
       // .evalTap(x => IO.println(s"${x.id} ${x.rating} ${x.popularity}"))
-      .map(_.toPgn)
+      // .map(_.toPgn)
+      .map(_.themes.toSet)
       .rethrow
       .map(_.render.value)
       .intersperse("\n\n")

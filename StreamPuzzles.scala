@@ -8,7 +8,6 @@ import cats.syntax.all.*
 import cats.effect.*
 import fs2.data.csv.*
 import fs2.data.csv.generic.semiauto.*
-import fs2.io.file.{ Files, Path }
 import de.lhns.fs2.compress.ZstdDecompressor
 
 import cats.effect.{ IO, IOApp }
@@ -51,12 +50,21 @@ object PuzzleStream extends IOApp.Simple:
       _.through(ZstdDecompressor[IO](defaultChunkSize).decompress)
       .through(text.utf8.decode)
       .through(decodeSkippingHeaders[Puzzle]())
-      .map(_.toPgn)
-      .rethrow
-      .map(_.render.value)
-      .intersperse("\n\n")
+
+      // .map(_.toPgn)
+      // .rethrow
+      // .map(_.render.value)
+      // .intersperse("\n\n")
+      // .through(text.utf8.encode)
+      // .through(Files[IO].writeAll(Path("puzzles.pgn")))
+
+      .map(_.openingTags.toSet)
+      .foldMonoid
+      .map(_.toList.sorted)
+      .flatMap(Stream.emits)
+      .intersperse("\n")
       .through(text.utf8.encode)
-      .through(Files[IO].writeAll(Path("puzzles.pgn")))
+      .through(Files[IO].writeAll(Path("openings.txt")))
 
 case class Puzzle(
     id: String,

@@ -1,4 +1,4 @@
-//> using scala "3.3.0-RC5"
+//> using scala "3.3.0"
 //> using dep "org.typelevel::toolkit:latest.release"
 //> using dep "org.typelevel::kittens:3.0.0"
 //> using dep "dev.optics::monocle-core:3.2.0"
@@ -12,15 +12,15 @@ import cats.syntax.all.*
 trait HasId[A, Id]:
   def getId(a: A): Id
 
-sealed trait Tree[A](value: A, child: Option[Node[A]]):
+sealed abstract class Tree[A](val value: A, val child: Option[Node[A]]):
 
-  def withValue(value: A): IsTree[A, this.type] = this match
+  def withValue(value: A): TreeSelector[A, this.type] = this match
     case n: Node[A]      => n.copy(value = value)
     case v: Variation[A] => v.copy(value = value)
 
   def mainline: List[Tree[A]]                           = this :: child.fold(List.empty[Tree[A]])(_.mainline)
   def hasId[Id](id: Id)(using h: HasId[A, Id]): Boolean = h.getId(value) == id
-  def modifyAt[Id](path: List[Id], f: TreeModifier[A])(using h: HasId[A, Id]): Option[IsTree[A, this.type]]
+  def modifyAt[Id](path: List[Id], f: TreeModifier[A])(using h: HasId[A, Id]): Option[TreeSelector[A, this.type]]
 
   // find node in the mainline
   def findInMainline(predicate: A => Boolean): Option[Tree[A]] =
@@ -31,6 +31,10 @@ sealed trait Tree[A](value: A, child: Option[Node[A]]):
         else c.findInMainline(predicate)
 
 object Tree:
+
+  given HasId[Int, Int] with
+    def getId(a: Int): Int = a
+
   def f[A]: TreeModifier[A] = node =>
     node match
       case n: Node[A]      => n
@@ -46,23 +50,23 @@ object Tree:
   val node = Node(1, Some(Node(2)))
   def modifyAt[A, Id](tree: Tree[A], path: List[Id], f: TreeModifier[A])(using
       h: HasId[A, Id]
-  ): IsTree[A, tree.type] = ???
+  ): TreeSelector[A, tree.type] = ???
   val x: Node[Int] = modifyAt(Node(1, Some(Node(2))), List(1), f)
-  summon[IsTree[Int, Node[Int]] =:= Node[Int]]
-  summon[IsTree[Int, Variation[Int]] =:= Variation[Int]]
+  summon[TreeSelector[Int, Node[Int]] =:= Node[Int]]
+  summon[TreeSelector[Int, Variation[Int]] =:= Variation[Int]]
   // summon[IsTree[Int, Node[Int]] =:= Variation[Int]]
   f(node)
 
-type IsTree[A, X <: Tree[A]] = X match
+type TreeSelector[A, X <: Tree[A]] <: Tree[A]= X match
   case Node[A]      => Node[A]
   case Variation[A] => Variation[A]
 
 // type Tree[A]         = Node[A] | Variation[A]
-type TreeModifier[A] = (tree: Tree[A]) => IsTree[A, tree.type]
+type TreeModifier[A] = (tree: Tree[A]) => TreeSelector[A, tree.type]
 
 final case class Node[A](
-    value: A,
-    child: Option[Node[A]] = None,
+    override val value: A,
+    override val child: Option[Node[A]] = None,
     variations: List[Variation[A]] = Nil
 ) extends Tree[A](value, child)
     derives Functor,
@@ -95,7 +99,7 @@ final case class Node[A](
         if predicate(c.value) then c.modifyInMainline(predicate, f)
         else c.modifyInMainline(predicate, f)
 
-final case class Variation[A](value: A, child: Option[Node[A]] = None) extends Tree[A](value, child)
+final case class Variation[A](override val value: A, override val child: Option[Node[A]] = None) extends Tree[A](value, child)
     derives Functor,
       Traverse:
   def toNode: Node[A] = Node(value, child)
@@ -105,6 +109,11 @@ type IntTree = Node[Int]
 
 object Hello extends IOApp.Simple:
   val node: Node[Int] = Node(1, Some(Node(2, Some(Node(3)))), List(Variation(4, Some(Node(5)))))
+  val xs: List[Tree[Int]] = ???
+
+  def const(xs: List[Tree[Int]]): List[Tree[Int]] =
+    xs.map(_.withValue(1))
+
   def run =
     IO.println(node) >>
       IO.println(node.mainline) >>
