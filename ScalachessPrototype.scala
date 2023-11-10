@@ -1,4 +1,4 @@
-//> using scala 3.2.2
+//> using scala 3.3.0
 
 @main def main =
   println("hello")
@@ -18,7 +18,7 @@ trait FromString[A]:
 
 sealed trait Uci extends Movable:
 
-  case class Move1(from: String, to: String) extends Uci:
+  case class Standard(from: String, to: String) extends Uci:
     def apply(situation: Situation): Either[String, Move] = ???
 
   case class Drop(piece: String, to: String) extends Uci:
@@ -51,16 +51,21 @@ trait Move2:
   def f: Situation => Option[Situation]
 
 sealed trait Move:
-  val current: Situation
-  val after: Situation
+  def current: Situation
+  def after: Situation
 
+  // toUci(current) == after.right
   def toUci: Uci
+  // toSan(current) == after.right
   def toSan: San
 
   object Normal
   object EnPassant
-  object Castles
+  object Castle
   object Drop
+
+
+def parse(xs: List[Moveable]): Either[String, List[Move]] = ???
 
 case class Game(moves: List[Move], ply: Int, clock: Int)
 
@@ -71,6 +76,8 @@ case class Situation(
     variant: Variant,
 )
 
+// what about Situation[Variant] ?
+
 // suggestion rename to Position
 // because it present a position of the game
 case class Board(
@@ -80,15 +87,14 @@ case class Board(
 )
 
 
-// rename to GameContext
+// rename to GameContext or GameState
 case class History(
     color: Color,
     lastMove: Option[Uci] = None,
     positionHashes: PositionHash = Monoid[PositionHash].empty,
     castles: Castles = Castles.all,
     unmovedRooks: UnmovedRooks,
-    halfMoveClock: HalfMoveClock = HalfMoveClock.initial
-    checkCount: CheckCount = CheckCount(0, 0),
-    crazyData: Option[Crazyhouse.Data] = None,
 )
 
+trait Variant:
+  def legalMoves(situation: Situation): List[Move]

@@ -9,7 +9,6 @@ import ornicar.scalalib.newtypes.*
 import Foo.*
 import LimitMinutes.*
 
-
 object Main:
   def main(args: Array[String]) =
     val f: Foo = Foo(42)
@@ -33,4 +32,3 @@ opaque type LimitMinutes = Int
 object LimitMinutes extends OpaqueInt[LimitMinutes]:
   extension (l: LimitMinutes)
     def addL(a: Int): LimitMinutes = l + a
-

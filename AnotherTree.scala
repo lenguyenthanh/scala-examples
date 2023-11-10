@@ -13,7 +13,7 @@ import scala.annotation.tailrec
 trait HasId[A, Id]:
   def getId(a: A): Id
 
-// try reducable
+// try reducible
 trait Tree[F[_]: Functor: Traverse, A]:
 
   def value(fa: F[A]): A
