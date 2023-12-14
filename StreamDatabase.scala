@@ -1,6 +1,6 @@
 //> using scala 3.3.1
 //> using toolkit typelevel:latest
-//> using dep de.lhns::fs2-compress-zstd:0.5.0
+//> using dep de.lhns::fs2-compress-zstd:1.0.0
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
 //> using dep org.lichess::scalachess:15.2.8
 
@@ -169,7 +169,7 @@ object Decompressor:
   val defaultChunkSize = 1024 * 4
 
   def decompress: Pipe[IO, Byte, Byte] =
-    _.through(ZstdDecompressor[IO](defaultChunkSize).decompress)
+    _.through(ZstdDecompressor.make[IO](defaultChunkSize).decompress)
 
 object PgnDecoder:
   import chess.format.pgn.*
