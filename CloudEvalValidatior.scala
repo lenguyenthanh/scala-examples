@@ -37,9 +37,7 @@ object Validator extends IOApp.Simple:
       .map(Evals.validate)
       .collect:
         case Left(x) => x.toString
-      .intersperse("\n")
-      .through(text.utf8.encode)
-      .through(Files[IO].writeAll(Path("errors.txt")))
+      .through(Files[IO].writeUtf8Lines(Path("errors.txt")))
       .compile
       .drain
 

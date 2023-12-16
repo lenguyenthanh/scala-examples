@@ -1,4 +1,4 @@
-//> using scala 3.3.0
+//> using scala 3.3.1
 //> using toolkit typelevel:latest
 //> using dep de.lhns::fs2-compress-zstd:0.5.0
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
@@ -62,9 +62,7 @@ object PuzzleStream extends IOApp.Simple:
       .foldMonoid
       .map(_.toList.sorted)
       .flatMap(Stream.emits)
-      .intersperse("\n")
-      .through(text.utf8.encode)
-      .through(Files[IO].writeAll(Path("openings.txt")))
+      .through(Files[IO].writeUtf8Lines(Path("openings.txt")))
 
 case class Puzzle(
     id: String,

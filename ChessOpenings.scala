@@ -1,4 +1,4 @@
-//> using scala 3.3.0
+//> using scala 3.3.1
 //> using toolkit typelevel:latest
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
 //> using dep org.lichess::scalachess:15.2.13
@@ -14,9 +14,7 @@ object ChessOpenings extends IOApp.Simple:
 
   val run: IO[Unit] =
     Stream.emits("id, name" +: all)
-      .intersperse("\n")
-      .through(text.utf8.encode)
-      .through(Files[IO].writeAll(Path("openings.csv")))
+      .through(Files[IO].writeUtf8Lines(Path("openings.csv")))
       .compile
       .drain
 
