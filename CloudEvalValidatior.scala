@@ -1,4 +1,4 @@
-//> using scala 3.3.1
+//> using scala 3.4.0
 //> using toolkit typelevel:latest
 //> using dep de.lhns::fs2-compress-zstd:1.0.0
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
