@@ -13,6 +13,7 @@ import chess.format.Uci
 import chess.variant.*
 import com.monovore.decline.*
 import com.monovore.decline.effect.*
+import chess.format.pgn.SanStr
 
 object Converter
     extends CommandIOApp(name = "Ucis to sans", header = "Convert ucis to san moves", version = "0.0.1"):
@@ -21,11 +22,12 @@ object Converter
     .map(execute(_).as(ExitCode.Success))
 
   private def execute(args: CLI.Args): IO[Unit] =
-    val ucis   = args.moves.split(" ").toList.traverse(Uci.apply).get
-    val replay = uciToSan(Situation(chess.variant.Standard), ucis)
+    val ucis      = args.moves.split(" ").toList.traverse(Uci.apply).get
+    val situation = args.fen.flatMap(Fen.read(args.variant, _)).getOrElse(Situation(args.variant))
+    val replay    = uciToSan(situation, ucis)
     IO.println(replay.map(_.mkString(" ")))
 
-  def uciToSan(sit: Situation, moves: List[Uci]) =
+  def uciToSan(sit: Situation, moves: List[Uci]): Either[ErrorStr, List[SanStr]] =
     moves
       .foldM(sit -> Nil): (x, move) =>
         move(x._1).map(md => Situation(md.finalizeAfter, !x._1.color) -> (md.toSanStr :: x._2))
