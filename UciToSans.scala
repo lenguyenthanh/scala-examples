@@ -22,16 +22,23 @@ object Converter
     .map(execute(_).as(ExitCode.Success))
 
   private def execute(args: CLI.Args): IO[Unit] =
-    val ucis      = args.moves.split(" ").toList.traverse(Uci.apply).get
-    val situation = args.fen.flatMap(Fen.read(args.variant, _)).getOrElse(Situation(args.variant))
-    val replay    = uciToSan(situation, ucis)
-    IO.println(replay.map(_.mkString(" ")))
+    val replay = for
+      ucis <- args.moves.split(" ").toList.traverse(Uci.apply).toRight("Invalid UCI moves")
+      situation = args.fen.flatMap(Fen.read(args.variant, _)).getOrElse(Situation(args.variant))
+      x <- validateMoves(situation, ucis)
+    yield x
+    // IO.println(replay.map(_.mkString(" ")))
+    IO.println(replay)
 
   def uciToSan(sit: Situation, moves: List[Uci]): Either[ErrorStr, List[SanStr]] =
     moves
       .foldM(sit -> Nil): (x, move) =>
         move(x._1).map(md => Situation(md.finalizeAfter, !x._1.color) -> (md.toSanStr :: x._2))
       .map(_._2.reverse)
+
+  def validateMoves(sit: Situation, moves: List[Uci]): Either[ErrorStr, Situation] =
+    moves.foldM(sit): (x, move) =>
+      move(x).map(md => Situation(md.finalizeAfter, !x.color))
 
 object CLI:
 
