@@ -1,6 +1,6 @@
-//> using scala 3.3.1
+//> using scala 3.4.1
 //> using toolkit typelevel:latest
-//> using dep de.lhns::fs2-compress-zstd:1.0.0
+//> using dep de.lhns::fs2-compress-zstd:2.0.0
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
 //> using dep org.lichess::scalachess:15.2.8
 
