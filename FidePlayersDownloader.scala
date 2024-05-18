@@ -34,13 +34,14 @@ object Main extends IOApp.Simple:
               case line if line.trim.nonEmpty => line
             .evalMap(parseOtherTitle)
             .filter(_.nonEmpty)
-            // .evalTap(IO.println)
+            .evalTap(IO.println)
             .fold(Set.empty[String])(_ ++ _)
             .compile
             .lastOrError
 
         def string(start: Int, end: Int)(line: String) =
           line.substring(start, end).trim.some.filter(_.nonEmpty)
+
         def number(start: Int, end: Int)(line: String) = string(start, end)(line).flatMap(_.toIntOption)
 
         def parseOtherTitle(line: String): IO[Set[String]] =

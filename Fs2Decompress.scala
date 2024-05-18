@@ -1,6 +1,6 @@
 //> using scala "3.4.1"
 //> using toolkit typelevel:0.1.25
-//> using dep de.lhns::fs2-compress-zip:2.0.0
+//> using dep de.lhns::fs2-compress-zip4j:2.0.0
 
 import cats.effect.{ IO, IOApp }
 import cats.syntax.all.*
@@ -34,4 +34,4 @@ object Decompressor:
   val defaultChunkSize = 1024 * 4
 
   def decompress: Pipe[IO, Byte, Byte] =
-    _.through(ArchiveSingleFileDecompressor(ZipUnarchiver.make[IO](defaultChunkSize)).decompress)
+    _.through(ArchiveSingleFileDecompressor(Zip4JUnarchiver.make[IO](defaultChunkSize)).decompress)

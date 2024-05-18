@@ -15,6 +15,15 @@ import com.monovore.decline.*
 import com.monovore.decline.effect.*
 import chess.format.pgn.SanStr
 
+// TODO: santouci
+// Chess toolbox
+// sans => ucis
+// ucis => sans
+// perft
+// fen
+// pgn
+// merge
+// database.lichess.org
 object Converter
     extends CommandIOApp(name = "Ucis to sans", header = "Convert ucis to san moves", version = "0.0.1"):
 
