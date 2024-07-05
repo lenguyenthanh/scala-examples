@@ -1,5 +1,6 @@
-//> using scala 3.5.0-RC2
+//> using scala 3.5.0-RC3
 //> using options -source:3.6-migration
+
 
 import bson.*
 
