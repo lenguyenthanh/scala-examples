@@ -1,14 +1,13 @@
-//> using scala 3.3.0
+//> using scala 3.5.0-RC4
 
 @main def main =
   println("hello")
-
-type Situation = Unit
 
 // Uci and San are two different ways to represent a move (maybe an invalid move)
 // Or at least a potential move
 // So, if we can apply it to a situation, we can get a move
 
+// Move representation
 sealed trait Movable:
   def apply(situation: Situation): Either[String, Move]
 
@@ -86,7 +85,6 @@ case class Board(
     byRole: ByRole[Bitboard]
 )
 
-
 // rename to GameContext or GameState
 case class History(
     color: Color,
@@ -98,3 +96,6 @@ case class History(
 
 trait Variant:
   def legalMoves(situation: Situation): List[Move]
+
+trait Fen[A]:
+  def parse(fen: A): Either[String, Situation]

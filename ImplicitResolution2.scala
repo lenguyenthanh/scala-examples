@@ -1,5 +1,4 @@
-//> using scala 3.5.0-RC3
-// //> using options -source:3.6-migration
+//> using scala 3.5.0-RC4
 //> using options -Xprint:typer
 
 trait SameRuntime[A, B]
