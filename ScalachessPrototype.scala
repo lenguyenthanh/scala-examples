@@ -1,5 +1,9 @@
 //> using scala 3.5.0-RC4
 
+// https://docs.scala-lang.org/scala3/book/types-dependent-function.html
+// https://docs.scala-lang.org/scala3/reference/new-types/type-lambdas-spec.html
+// https://docs.scala-lang.org/scala3/reference/other-new-features/kind-polymorphism.html
+// https://docs.scala-lang.org/scala3/reference/new-types/polymorphic-function-types.html
 @main def main =
   println("hello")
 
@@ -17,8 +21,11 @@ trait FromString[A]:
 
 sealed trait Uci extends Movable:
 
+  def x: Int => Int = ???
+
   case class Standard(from: String, to: String) extends Uci:
     def apply(situation: Situation): Either[String, Move] = ???
+
 
   case class Drop(piece: String, to: String) extends Uci:
     def apply(situation: Situation): Either[String, Move] = ???

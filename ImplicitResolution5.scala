@@ -7,22 +7,14 @@
 // https://github.com/scala/scala3/issues/8092
 // https://github.com/scala/scala3/discussions/17809
 
-import scala.compiletime.*
-
-trait A[T]
 
 object x:
-
-  // given A[String] = ???
-  given xa: A[String] = ???
-
-object y:
-
-  given y: A[String] = ???
+  given Int = 1
 
 object z:
-  import y.given
   import x.given
 
-  val a = summonInline[A[String]]
-  val b = summon[A[String]]
+  given Int = 0
+  def main(args: Array[String]): Unit =
+    val y = summon[Int]
+    println(y)

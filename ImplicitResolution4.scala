@@ -20,13 +20,13 @@ object x:
 
 object Handlers:
 
-  // given [T, A](using SameRuntime[T, A], BSONWriter[A]): BSONWriter[T] = ???
+  given [T, A](using SameRuntime[T, A], BSONWriter[A]): BSONWriter[T] = ???
   // given (using SameRuntime[Id, String], BSONWriter[String]): BSONWriter[Id] = ???
-  given BSONWriter[Id] = ???
+  // given BSONWriter[Id] = ???
 
 object o:
-  import Handlers.given
   import x.given
+  import Handlers.given
 
   val y = summon[BSONWriter[Id]]
 
