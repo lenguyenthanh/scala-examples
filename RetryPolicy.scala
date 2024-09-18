@@ -58,8 +58,12 @@ object Main extends IOApp.Simple {
   def functor2[F[_]: Functor](x: F[Int])(f: Int => Double): F[Double] =
     x.map(f)
 
-  def combine[F[_]: Applicative](x: F[Int], y: F[String])(f: (Int, String) => Double): F[Double] =
+  def combine[F[_]](x: F[Int], y: F[String])(f: (Int, String) => Double): F[Double] =
     (x, y).mapN(f)
+
+  trait Ap[F[_]] {
+    def apply[A, B](ff: F[A => B])(fa: F[A]): F[B]
+  }
 
   def monad[F[_]: Monad](x: F[Int], y: F[String])(f: (Int, String) => Double): F[Double] =
     x.flatMap(a => y.map(b => f(a, b)))
