@@ -1,4 +1,4 @@
-//> using scala "3.3.0"
+//> using scala "3.3.4"
 //> using repository "https://raw.githubusercontent.com/lichess-org/lila-maven/master"
 //> using dep "com.github.ornicar::scalalib:9.5.4"
 //> using options -Ysafe-init, -feature

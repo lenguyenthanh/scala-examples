@@ -1,21 +1,31 @@
-//> using scala 3.4.2
+//> using scala 3.5.1
+//> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
+//> using dep org.lichess::scalalib-core:11.2.13
 
-package opaque
+import scalalib.newtypes.*
 
-object Main:
+@main def main =
+  import Bar.Z
+  val y = Bar(42)
+  val y1 = Bar(43)
+  val y2 = y + y1
+
+  val z1 = Z(42)
+  val z2 = Z(43)
+  val z3 = z1 + z2
+  val z4 = x(z1)
+  Z.raw(z1)
+
+def x(z: Bar.Z): Int =
+  z.value
+
+object Bar:
   opaque type Bar = Int
-  object Bar:
-    def apply(i: Int): Bar = i
+  final inline def apply(i: Int): Bar = i
+  extension (inline b: Bar)
+    final inline def value: Int = b
+    final inline def +(other: Bar): Bar = b + other
 
-opaque type Foo = Int
-object Foo:
-  def apply(i: Int): Foo = i
-
-val x: Foo = Foo(42)
-val y = x.value
-
-extension (f: Foo)
-  def value: Int = f
-
-object t:
-  val x = Foo(42).value
+  type Z = Z.Z
+  object Z extends OpaqueInt[Z.Z]:
+    opaque type Z = Int

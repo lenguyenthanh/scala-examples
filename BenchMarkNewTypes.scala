@@ -1,4 +1,4 @@
-//> using scala 3.3.0
+//> using scala 3.3.4
 //> using repository https://raw.githubusercontent.com/lichess-org/lila-maven/master
 //> using dep org.lichess::scalachess:15.4.3
 //> using options -Ysafe-init, -feature
