@@ -1,8 +1,9 @@
-//> using scala 3.3.3
-//> using toolkit typelevel:0.1.27
-//> using dep org.rocksdb:rocksdbjni:9.4.0
-//> using dep org.scodec::scodec-core:2.3.1
+//> using scala 3.6.3
+//> using toolkit typelevel:default
+//> using dependency org.rocksdb:rocksdbjni:9.10.0
+//> using dependency org.scodec::scodec-core:2.3.2
 //> using options -deprecation
+///> using options -Wall
 
 import cats.*
 import cats.syntax.all.*
@@ -16,7 +17,8 @@ import scodec.codecs.*
 object Main extends IOApp.Simple {
   def run: IO[Unit] =
     RocksDB.make[IO]("rocksdb", RocksDB.Options(createIfMissing = true)).use { db =>
-      bytes(db) >> codec(db)
+      // bytes(db) >> codec(db) >> example(db)
+      example(db)
     }
 
   def bytes(db: RocksDB[IO]): IO[Unit] =
@@ -27,6 +29,16 @@ object Main extends IOApp.Simple {
       _ <- db.getBytes(hex"03").flatMap(v => IO(println(v)))
       _ <- db.deleteBytes(hex"01")
       _ <- db.getBytes(hex"01").flatMap(v => IO(println(v)))
+    yield ()
+
+  def example(db: RocksDB[IO]): IO[Unit] =
+    for
+      _ <- db.put(Example(1, Some("a")), Example(2, Some("b")))
+      _ <- db.put(Example(3, None), Example(4, None))
+      _ <- db.get[Example, Example](Example(1, Some("a"))).flatMap(v => IO(println(v)))
+      _ <- db.get[Example, Example](Example(3, None)).flatMap(v => IO(println(v)))
+      _ <- db.delete(Example(1, Some("a")))
+      _ <- db.get[Example, Example](Example(1, Some("a"))).flatMap(v => IO(println(v)))
     yield ()
 
   def codec(db: RocksDB[IO]): IO[Unit] =
@@ -40,6 +52,10 @@ object Main extends IOApp.Simple {
       _ <- db.get(1).flatMap(v => IO(println(v)))
     yield ()
 }
+
+case class Example(a: Int, b: Option[String])
+object Example:
+  given Codec[Example] = (int32 :: optional(bool, utf8_32)).as[Example]
 
 trait RocksDB[F[_]: Monad] {
 
@@ -86,7 +102,7 @@ object RocksDB:
       )
     )(o => Sync[F].blocking(o.close()))
 
-  def make[F[_]: Sync: MonadThrow](path: String, option: Options): Resource[F, RocksDB[F]] =
+  def make[F[_]: Sync](path: String, option: Options): Resource[F, RocksDB[F]] =
     Resource.eval(Sync[F].blocking(JRocksDB.loadLibrary())) >>
       make(option)
         .flatMap: option =>
