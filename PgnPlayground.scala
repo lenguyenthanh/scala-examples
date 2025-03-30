@@ -1,4 +1,4 @@
-//> using scala "3.3.3"
+//> using scala nightly
 //> using dep "org.typelevel::toolkit:latest.release"
 //> using repository "https://raw.githubusercontent.com/lichess-org/lila-maven/master"
 //> using dep "org.lichess::scalachess:14.9.20"

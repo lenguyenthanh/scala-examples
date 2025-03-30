@@ -1,4 +1,4 @@
-//> using scala 3.5.0-RC4
+//> using scala 3.3.4
 
 // https://docs.scala-lang.org/scala3/book/types-dependent-function.html
 // https://docs.scala-lang.org/scala3/reference/new-types/type-lambdas-spec.html
@@ -25,7 +25,6 @@ sealed trait Uci extends Movable:
 
   case class Standard(from: String, to: String) extends Uci:
     def apply(situation: Situation): Either[String, Move] = ???
-
 
   case class Drop(piece: String, to: String) extends Uci:
     def apply(situation: Situation): Either[String, Move] = ???
