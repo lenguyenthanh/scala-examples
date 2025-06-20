@@ -2,6 +2,7 @@
 //> using toolkit typelevel:latest
 
 package bench
+
 import cats.syntax.all.*
 import org.openjdk.jmh.annotations.*
 import java.util.concurrent.TimeUnit
