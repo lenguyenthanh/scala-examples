@@ -4,6 +4,7 @@
 // https://docs.scala-lang.org/scala3/reference/new-types/type-lambdas-spec.html
 // https://docs.scala-lang.org/scala3/reference/other-new-features/kind-polymorphism.html
 // https://docs.scala-lang.org/scala3/reference/new-types/polymorphic-function-types.html
+// check cats-effect polling system design for inspiration
 @main def main =
   println("hello")
 
