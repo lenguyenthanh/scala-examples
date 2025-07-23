@@ -40,18 +40,34 @@ object LimitModifier:
 
 object Tiebreak:
   type Code = "BPG" | "BH" | "KS"
+
+
   extension (code: Code)
     inline def value: String = code
 
   type PlayerPoints = Float
 
   object Code:
-    val all: Set[Code] =
-      Set("BPG", "BH", "KS")
+    import scala.compiletime.*
 
-    def fromString(str: String): Option[Code] =
-      all.find(_ == str)
+    inline def summonAllValues[T <: String]: List[T] =
+      inline erasedValue[T] match
+        case _: (a | b) =>
+          // Split the union type into its parts recursively
+          val tuple = constValueTuple[T].asInstanceOf[Product]
+          tuple.productIterator.toList.asInstanceOf[List[T]]
+        case _: String =>
+          List(constValue[T])
 
+    val all: List[Code] = summonAllValues[Code]
+
+    println(all)
+    // val all: Set[Code] =
+    //   Set("BPG", "BH", "KS")
+    //
+    // def fromString(str: String): Option[Code] =
+    //   all.find(_ == str)
+    //
   def apply[F[_]: Applicative, A <: Code](
       code: A,
       mkCutModifier: => F[CutModifier],
@@ -62,10 +78,10 @@ object Tiebreak:
       case "BH"   => mkCutModifier.map(Buchholz.apply)
       case "KS"   => mkLimitModifier.map(KoyaSystem.apply)
 
-  // type TiebreakModifier[A <: Tiebreak.Code] = A match
-  //   case "BH" => CutModifier
-  //   case "KS"                              => LimitModifier
-  //   case _                                 => Unit
+  type TiebreakModifier[A <: Tiebreak.Code] = A match
+    case "BH" => CutModifier
+    case "KS"                              => LimitModifier
+    case _                                 => Unit
 
   def all: List[Tiebreak] =
     List(
