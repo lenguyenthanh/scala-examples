@@ -5,6 +5,8 @@
 // https://docs.scala-lang.org/scala3/reference/other-new-features/kind-polymorphism.html
 // https://docs.scala-lang.org/scala3/reference/new-types/polymorphic-function-types.html
 // check cats-effect polling system design for inspiration
+// https://typelevel.org/blog/2015/07/13/type-members-parameters.html
+// https://typelevel.org/blog/2016/03/13/information-hiding.html
 @main def main =
   println("hello")
 
