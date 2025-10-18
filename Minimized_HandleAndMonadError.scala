@@ -26,6 +26,7 @@ final case class OutOfRetries[E](attempts: Vector[E])
 }
 
 object Main extends IOApp.Simple {
+
   def withRetries[F[_] : MonadThrow, A](limit: Int)(body: F[A]): F[A] = {
     def loop(remaining: Int, errors: Chain[Throwable]): F[A] =
       if (remaining <= 0) OutOfRetries(errors.toVector).raiseError[F, A]
@@ -36,7 +37,7 @@ object Main extends IOApp.Simple {
     loop(limit, Chain.empty)
   }
 
-  def runF[F[_] : Sync : Console]: F[Unit] =
+  def runF[F[_] : MonadThrow: Clock : Console]: F[Unit] =
     Handle
       .allowF[F, OperationFailure] { implicit h =>
         withRetries(2) {
